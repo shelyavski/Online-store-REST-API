@@ -10,6 +10,7 @@ from .models import Order
 # TODO: Search 'orders' by product name
 # TODO: Search 'stats' by product name  !!!
 
+# TODO: Do not forget requirements
 
 class StatsFilter(filters.FilterSet):
     METRIC_MAP = {   # Defines the annotation Function in the get_metric() method, based on the metric that was passed.
