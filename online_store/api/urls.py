@@ -4,8 +4,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r'products', views.ProductViewSet)
-router.register(r'orders', views.OrderViewSet)
-router.register(r'stats', views.StatsViewSet, basename='stats')
+router.register(r'orders', views.OrderViewSet)  # TODO: Fix stats endpoint   ---> api/stats
 
 urlpatterns = [
     path('', include(router.urls)),

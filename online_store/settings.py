@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'drf_yasg',
+    'django_filters',
     'online_store.api.apps.ApiConfig'
 ]
 

@@ -12,5 +12,3 @@ class Product(models.Model):
 class Order(models.Model):
     date = models.DateField()
     products = models.ManyToManyField(Product, blank=True, related_name='orders')
-
-

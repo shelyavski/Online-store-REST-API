@@ -1,14 +1,12 @@
 from rest_framework import serializers
 
-from django.core.exceptions import ObjectDoesNotExist
-
 from .models import Product, Order
-
-# TODO: ADD swagger to api root
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    price = serializers.DecimalField(max_digits=1_000, decimal_places=2, coerce_to_string=False)
+    price = serializers.DecimalField(max_digits=1_000,
+                                     decimal_places=2,
+                                     coerce_to_string=False)
 
     class Meta:
         model = Product
@@ -16,53 +14,34 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = ProductSerializer(many=True, required=False, read_only=False)
+    products = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
+                                                  many=True)
 
     class Meta:
         model = Order
         fields = ['id', 'date', 'products']
 
-    def create(self, validated_data):
-        products_data = validated_data.pop('products')
-        products = []
-
-        # Check if a product with this title already exists in the DB
-        for product_data in products_data:
-
-            # If it exists update product price.
-            try:
-                product = Product.objects.get(title=product_data['title'])
-                product.price = product_data['price']
-
-            # If not create a new product.
-            except ObjectDoesNotExist:
-                product = Product.objects.create(**product_data)
-            products.append(product)
-
-        order = Order.objects.create(**validated_data)
-        order.products.set(products)
-        return order
-
-    def update(self, instance, validated_data):
-        products_data = validated_data.pop('products')
-        products = instance.products.all()
-        products = list(products)
-        instance.date = validated_data.get('date', instance.date)
-        instance.save()
-
-        # For many products
-        for product_data in products_data:
-            product = products.pop(0)
-            product.title = product_data.get('title', product.title)
-            product.price = product_data.get('price', product.price)
-            product.save()
-
-        return instance
+    def to_representation(self, instance):  # Presents the data in a 'nested serializer format'
+        data = super().to_representation(instance)
+        products_list = []
+        for product_id in data['products']:
+            product = instance.products.get(pk=product_id)
+            products_list.append(
+                {
+                    'id': product.id,
+                    'title': product.title,
+                    'price': product.price
+                }
+            )
+        data['products'] = products_list
+        return data
 
 
 class StatsSerializer(serializers.Serializer):
     month = serializers.DateField(read_only=True)
-    value = serializers.DecimalField(max_digits=9999, decimal_places=2, coerce_to_string=False,
+    value = serializers.DecimalField(max_digits=9999,
+                                     decimal_places=2,
+                                     coerce_to_string=False,
                                      read_only=True)
 
     class Meta:
@@ -74,10 +53,10 @@ class StatsSerializer(serializers.Serializer):
 
         representation = super(StatsSerializer, self).to_representation(value)
 
-        # Date representation
+        # Date representation format
         representation['month'] = value['month'].strftime('%Y %b')
 
-        # Representation if metric=count
+        # Metric representation format if metric=count
         if self.context['request'].query_params['metric'] == 'count':
             representation['value'] = int(value['value'])
         return representation
