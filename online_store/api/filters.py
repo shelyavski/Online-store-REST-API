@@ -5,12 +5,6 @@ from django.db.models.functions import TruncMonth
 
 from .models import Order
 
-# TODO: Add filter that orders 'products' by name
-# TODO: Add filter that orders 'orders' by name
-# TODO: Search 'orders' by product name
-# TODO: Search 'stats' by product name  !!!
-
-# TODO: Do not forget requirements
 
 class StatsFilter(filters.FilterSet):
     METRIC_MAP = {   # Defines the annotation Function in the get_metric() method, based on the metric that was passed.

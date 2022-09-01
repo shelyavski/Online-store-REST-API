@@ -7,16 +7,24 @@ from .models import Product, Order
 from .filters import StatsFilter
 
 from django_filters import rest_framework as filters
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = (SearchFilter, OrderingFilter)
+    search_fields = ['title',]
+    ordering_fields = ['title', 'price']
 
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all().prefetch_related('products')
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (filters.DjangoFilterBackend, OrderingFilter, SearchFilter)
+    ordering_fields = ['date']
+    search_fields = ['products__title']
+    # Searching on 'stats' works through the url, but not through browsable api --> Extra actions
+    # Example: stats/?date_start=2021-08-01&date_end=2023-08-30&metric=price&search=2
 
     @property
     def filterset_class(self):

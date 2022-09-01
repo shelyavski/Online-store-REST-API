@@ -1,10 +1,10 @@
 from django.urls import path, include
-from rest_framework import routers
 from . import views
+from .routers import CustomApiRouter
 
-router = routers.DefaultRouter()
+router = CustomApiRouter()
 router.register(r'products', views.ProductViewSet)
-router.register(r'orders', views.OrderViewSet)  # TODO: Fix stats endpoint   ---> api/stats
+router.register(r'orders', views.OrderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
