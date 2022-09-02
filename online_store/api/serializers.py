@@ -14,27 +14,14 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
-                                                  many=True)
 
     class Meta:
         model = Order
         fields = ['id', 'date', 'products']
 
     def to_representation(self, instance):  # Presents the data in a 'nested serializer format'
-        data = super().to_representation(instance)
-        products = Product.objects.in_bulk(id_list=data['products'], field_name='id')
-        formatted_products_list = []
-        for product in products.values():
-            formatted_products_list.append(
-                {
-                    'id': product.id,
-                    'title': product.title,
-                    'price': product.price
-                }
-            )
-        data['products'] = formatted_products_list
-        return data
+        self.fields['products'] = ProductSerializer(many=True)
+        return super(OrderSerializer, self).to_representation(instance)
 
 
 class StatsSerializer(serializers.Serializer):
