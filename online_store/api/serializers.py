@@ -23,17 +23,17 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):  # Presents the data in a 'nested serializer format'
         data = super().to_representation(instance)
-        products_list = []
-        for product_id in data['products']:
-            product = instance.products.get(pk=product_id)
-            products_list.append(
+        products = Product.objects.in_bulk(id_list=data['products'], field_name='id')
+        formatted_products_list = []
+        for product in products.values():
+            formatted_products_list.append(
                 {
                     'id': product.id,
                     'title': product.title,
                     'price': product.price
                 }
             )
-        data['products'] = products_list
+        data['products'] = formatted_products_list
         return data
 
 
